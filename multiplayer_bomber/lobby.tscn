@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://jhdlqsokif5o"]
+[gd_scene load_steps=3 format=3 uid="uid://jhdlqsokif5o"]
 
 [ext_resource type="Script" path="res://lobby.gd" id="1"]
+[ext_resource type="Script" path="res://webRTC-client/multiplayer_client.gd" id="2_dp336"]
 
 [node name="Lobby" type="Control"]
 layout_mode = 3
@@ -59,24 +60,26 @@ offset_bottom = 296.0
 size_flags_horizontal = 2
 size_flags_vertical = 2
 
-[node name="PortForward" type="Label" parent="Players"]
+[node name="RoomCodeLabel" type="Label" parent="Players"]
 layout_mode = 0
-offset_left = -124.0
-offset_top = 375.0
-offset_right = 128.0
-offset_bottom = 429.0
-theme_override_constants/line_spacing = 6
-text = "If you want non-LAN clients to connect,
-make sure the port 10567 in UDP
-is forwarded on your router."
+offset_left = 1.0
+offset_top = 365.5
+offset_right = 142.0
+offset_bottom = 391.5
+size_flags_horizontal = 2
+size_flags_vertical = 0
+text = "The room code is: "
 
-[node name="FindPublicIP" type="LinkButton" parent="Players"]
+[node name="RoomCode" type="TextEdit" parent="Players"]
 layout_mode = 0
-offset_left = 168.0
-offset_top = 393.5
-offset_right = 341.0
-offset_bottom = 407.5
-text = "Find your public IP address"
+offset_left = 145.0
+offset_top = 360.5
+offset_right = 299.0
+offset_bottom = 399.5
+size_flags_horizontal = 2
+size_flags_vertical = 0
+text = "Waiting..."
+editable = false
 
 [node name="Connect" type="Panel" parent="."]
 layout_mode = 1
@@ -114,7 +117,7 @@ size_flags_horizontal = 2
 size_flags_vertical = 2
 text = "The Warrior"
 
-[node name="IPLabel" type="Label" parent="Connect"]
+[node name="RoomLabel" type="Label" parent="Connect"]
 layout_mode = 0
 offset_left = 15.0
 offset_top = 66.0
@@ -123,9 +126,9 @@ offset_bottom = 80.0
 size_flags_horizontal = 2
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 16
-text = "IP:"
+text = "Room:"
 
-[node name="IPAddress" type="LineEdit" parent="Connect"]
+[node name="RoomAddres" type="LineEdit" parent="Connect"]
 layout_mode = 0
 offset_left = 17.0
 offset_top = 85.0
@@ -133,7 +136,7 @@ offset_right = 173.0
 offset_bottom = 109.0
 size_flags_horizontal = 2
 size_flags_vertical = 2
-text = "127.0.0.1"
+placeholder_text = "12345"
 
 [node name="Host" type="Button" parent="Connect"]
 layout_mode = 0
@@ -167,7 +170,12 @@ theme_override_colors/font_color = Color(0.820312, 0.291595, 0.291595, 1)
 
 [node name="ErrorDialog" type="AcceptDialog" parent="."]
 
+[node name="Client" type="Node" parent="."]
+script = ExtResource("2_dp336")
+autojoin = null
+lobby = null
+mesh = null
+
 [connection signal="pressed" from="Players/Start" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="Players/FindPublicIP" to="." method="_on_find_public_ip_pressed"]
 [connection signal="pressed" from="Connect/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="Connect/Join" to="." method="_on_join_pressed"]

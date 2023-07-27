@@ -2,11 +2,14 @@ extends Control
 
 func _ready():
 	# Called every time the node is added to the scene.
+	gamestate.client = $Client
+	gamestate.address = "ws://127.0.0.1:9080"  #Replace this with your hosted address
 	gamestate.connection_failed.connect(self._on_connection_failed)
 	gamestate.connection_succeeded.connect(self._on_connection_success)
 	gamestate.player_list_changed.connect(self.refresh_lobby)
 	gamestate.game_ended.connect(self._on_game_ended)
 	gamestate.game_error.connect(self._on_game_error)
+	gamestate.session_created.connect(self._on_session_created)
 	# Set the player name according to the system username. Fallback to the path.
 	if OS.has_environment("USERNAME"):
 		$Connect/Name.text = OS.get_environment("USERNAME")
@@ -34,9 +37,9 @@ func _on_join_pressed():
 		$Connect/ErrorLabel.text = "Invalid name!"
 		return
 
-	var ip = $Connect/IPAddress.text
-	if not ip.is_valid_ip_address():
-		$Connect/ErrorLabel.text = "Invalid IP address!"
+	var room = $Connect/RoomAddres.text
+	if $Connect/Name.text == "":
+		$Connect/ErrorLabel.text = "Invalid Room code!"
 		return
 
 	$Connect/ErrorLabel.text = ""
@@ -44,7 +47,7 @@ func _on_join_pressed():
 	$Connect/Join.disabled = true
 
 	var player_name = $Connect/Name.text
-	gamestate.join_game(ip, player_name)
+	gamestate.join_game(room, player_name)
 
 
 func _on_connection_success():
@@ -72,7 +75,8 @@ func _on_game_error(errtxt):
 	$Connect/Host.disabled = false
 	$Connect/Join.disabled = false
 
-
+func _on_session_created(lobby):
+	$Players/RoomCode.text = lobby
 func refresh_lobby():
 	var players = gamestate.get_player_list()
 	players.sort()
@@ -87,6 +91,3 @@ func refresh_lobby():
 func _on_start_pressed():
 	gamestate.begin_game()
 
-
-func _on_find_public_ip_pressed():
-	OS.shell_open("https://icanhazip.com/")

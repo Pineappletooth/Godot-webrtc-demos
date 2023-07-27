@@ -1,9 +1,14 @@
 extends Node
 
-# Default game server port. Can be any number between 1024 and 49151.
-# Not on the list of registered or common ports as of November 2020:
-# https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
-const DEFAULT_PORT = 10567
+@export var address := ""
+@export var client: MultiplayerClient:
+	set(value):
+		client = value
+		client.lobby_joined.connect(self._lobby_joined)
+		client.lobby_sealed.connect(self._lobby_sealed)
+		client.connected.connect(self._connected)
+		client.disconnected.connect(self._disconnected)
+
 
 # Max number of players.
 const MAX_PEERS = 12
@@ -23,7 +28,7 @@ signal connection_failed()
 signal connection_succeeded()
 signal game_ended()
 signal game_error(what)
-
+signal session_created(id)
 # Callback from SceneTree.
 func _player_connected(id):
 	# Registration of a client beings here, tell the connected player that we are here.
@@ -87,17 +92,15 @@ func load_world():
 
 
 func host_game(new_player_name):
+	assert(client != null && address != "","PLEASE SET gamestate.client AND gamestate.address")
 	player_name = new_player_name
-	peer = ENetMultiplayerPeer.new()
-	peer.create_server(DEFAULT_PORT, MAX_PEERS)
-	multiplayer.set_multiplayer_peer(peer)
+	client.start(address, "", true)
 
 
-func join_game(ip, new_player_name):
+func join_game(roomId, new_player_name):
+	assert(client != null && address != "","PLEASE SET gamestate.client AND gamestate.address")
 	player_name = new_player_name
-	peer = ENetMultiplayerPeer.new()
-	peer.create_client(ip, DEFAULT_PORT)
-	multiplayer.set_multiplayer_peer(peer)
+	client.start(address, roomId, true)
 
 
 func get_player_list():
@@ -140,6 +143,22 @@ func end_game():
 	game_ended.emit()
 	players.clear()
 
+func _connected(id,a):
+	_log("[Signaling] Server connected with ID: %d" % id)
+
+func _disconnected():
+	_log("[Signaling] Server disconnected: %d - %s" % [client.code, client.reason])
+
+func _lobby_joined(lobby):
+	session_created.emit(lobby)
+	_log("[Signaling] Joined lobby %s" % lobby)
+
+func _lobby_sealed():
+	_log("[Signaling] Lobby has been sealed")
+
+func _log(msg):
+	print(msg)
+
 
 func _ready():
 	multiplayer.peer_connected.connect(self._player_connected)
@@ -147,3 +166,5 @@ func _ready():
 	multiplayer.connected_to_server.connect(self._connected_ok)
 	multiplayer.connection_failed.connect(self._connected_fail)
 	multiplayer.server_disconnected.connect(self._server_disconnected)
+
+	

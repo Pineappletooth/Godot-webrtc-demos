@@ -1,7 +1,7 @@
 # Pong Multiplayer
 
 A multiplayer demo of Pong. One player presses "host".
-The other presses "join". This only works locally.
+The other presses "join". 
 
 Language: GDScript
 
